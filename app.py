@@ -10,8 +10,13 @@ Run with:
 import os
 import json
 import shutil
+import warnings
 import tempfile
 from datetime import datetime
+
+# Suppress pydub's import-time ffmpeg detection warnings (we configure it ourselves)
+warnings.filterwarnings("ignore", message="Couldn't find ffmpeg", category=RuntimeWarning)
+warnings.filterwarnings("ignore", message="Couldn't find ffprobe", category=RuntimeWarning)
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -296,7 +301,7 @@ with st.sidebar:
             | Layer | Tool |
             |---|---|
             | Frontend | Streamlit |
-            | Transcription | OpenAI Whisper |
+            | Transcription | Google Speech-to-Text |
             | Summarization | Google Gemini 2.5 Flash |
             | Storage | Local JSON |
             | Language | Python 3.11+ |
