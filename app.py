@@ -392,7 +392,7 @@ if uploaded_file is not None:
                 audio_path = _save_uploaded_file(uploaded_file)
 
             # Step 2: Transcribe
-            with st.spinner("🎙️ Transcribing audio with Whisper..."):
+            with st.spinner("🎙️ Transcribing audio with Google Speech-to-Text..."):
                 transcript = transcribe_audio(audio_path)
 
             if not transcript.strip():
@@ -542,7 +542,7 @@ else:
 st.markdown(
     """
     <div class="footer">
-        Built with <span>Streamlit</span> · <span>OpenAI Whisper</span> · <span>Google Gemini 2.5 Flash</span>
+        Built with <span>Streamlit</span> · <span>Google Speech-to-Text</span> · <span>Google Gemini 2.5 Flash</span>
     </div>
     """,
     unsafe_allow_html=True,
