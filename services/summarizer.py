@@ -1,7 +1,10 @@
 """
 services/summarizer.py
 ----------------------
-Generates structured meeting summaries using Google Gemini Flash.
+Generates structured meeting summaries using Google Gemini 2.5 Flash.
+
+Uses the new `google-genai` SDK (google.genai), which replaced the
+deprecated `google-generativeai` (google.generativeai) package.
 
 Implements hierarchical summarization:
   - Short transcripts  → single Gemini call → final JSON
@@ -17,7 +20,7 @@ import os
 import json
 import re
 
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 
 from services.chunker import needs_chunking, split_transcript
@@ -25,20 +28,19 @@ from prompts import CHUNK_SUMMARY_PROMPT, FINAL_SUMMARY_PROMPT
 
 load_dotenv()
 
-# ── Gemini client setup ────────────────────────────────────────────────────────
+# ── Configuration ──────────────────────────────────────────────────────────────
 _MODEL_NAME = "gemini-2.5-flash"
 
 
-def _get_model() -> genai.GenerativeModel:
-    """Initialize and return the Gemini model (lazy, per-call)."""
+def _get_client() -> genai.Client:
+    """Initialize and return the Gemini client."""
     api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key:
         raise ValueError(
             "GOOGLE_API_KEY is not set. "
             "Please add it to your .env file."
         )
-    genai.configure(api_key=api_key)
-    return genai.GenerativeModel(_MODEL_NAME)
+    return genai.Client(api_key=api_key)
 
 
 # ── Internal helpers ───────────────────────────────────────────────────────────
@@ -56,8 +58,11 @@ def _call_gemini(prompt: str) -> str:
     Raises:
         RuntimeError: If the model returns an empty or blocked response.
     """
-    model = _get_model()
-    response = model.generate_content(prompt)
+    client = _get_client()
+    response = client.models.generate_content(
+        model=_MODEL_NAME,
+        contents=prompt,
+    )
 
     if not response.text:
         raise RuntimeError(
